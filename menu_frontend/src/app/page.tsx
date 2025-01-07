@@ -17,6 +17,7 @@ export default function Home() {
     const fetchMenu = async () => {
       try {
         const menu = await getWeeklyMenu(new Date(), language);
+        console.log('Fetched menu:', menu); // Debug log
         setWeeklyMenu(menu);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch menu');
@@ -25,6 +26,12 @@ export default function Home() {
 
     fetchMenu();
   }, [language]);
+
+  const today = format(new Date(), 'yyyyMMdd');
+  const todayMenu = weeklyMenu?.days.find(day => day.date === today);
+
+  console.log('Today:', today); // Debug log
+  console.log('Today menu:', todayMenu); // Debug log
 
   if (error) {
     return (
@@ -50,32 +57,34 @@ export default function Home() {
     );
   }
 
-  // Find today's menu
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const todayMenu = weeklyMenu.days.find(day => day.date === today);
-
   return (
     <main className="min-h-screen bg-gray-100 py-8">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
+        {/* Language selector */}
+        <div className="flex justify-center mb-8 space-x-4">
+          {Object.entries(LANGUAGES).map(([code, name]) => (
+            <button
+              key={code}
+              onClick={() => setLanguage(code as Language)}
+              className={`px-4 py-2 rounded-lg ${
+                language === code
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+
+        {/* View toggle */}
+        <div className="flex justify-center mb-8">
           <button
             onClick={() => setShowWeekly(!showWeekly)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full transition-colors duration-200"
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
             {showWeekly ? '오늘의 메뉴 보기' : '주간 메뉴 보기'}
           </button>
-
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value as Language)}
-            className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-          >
-            {Object.entries(LANGUAGES).map(([code, name]) => (
-              <option key={code} value={code}>
-                {name}
-              </option>
-            ))}
-          </select>
         </div>
 
         {showWeekly ? (
@@ -83,7 +92,7 @@ export default function Home() {
         ) : todayMenu ? (
           <TodayMenu menu={todayMenu} />
         ) : (
-          <div className="text-center text-gray-600">
+          <div className="text-center text-xl text-gray-600">
             오늘은 메뉴가 없습니다.
           </div>
         )}

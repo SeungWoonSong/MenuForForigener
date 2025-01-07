@@ -27,7 +27,7 @@ class TranslationService:
             api_key=api_key,
             base_url="https://api.deepseek.com"
         )
-        self.db_path = os.path.join(os.path.dirname(__file__), '../../data/menu.db')
+        self.db_path = os.path.join(os.path.dirname(__file__), '/home/ubuntu/susong/ForeignMenu/data/menu.db')
         self._setup_database()
 
     def _setup_database(self):
