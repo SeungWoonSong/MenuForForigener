@@ -21,44 +21,12 @@ export default function TodayMenu({ menu }: TodayMenuProps) {
       {/* Lunch Section */}
       {menu.lunch.length > 0 && (
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-blue-600">점심</h3>
+          <h3 className="text-xl font-semibold mb-4 text-blue-600">Lunch</h3>
           <div className="space-y-4">
             {menu.lunch.map((item, index) => (
               <div key={index} className="border-l-4 border-blue-400 pl-4">
                 <div className="flex justify-between items-start">
                   <h4 className="font-medium text-lg">{item.name}</h4>
-                  <span className="text-sm text-gray-500">{item.corner_name}</span>
-                </div>
-                {item.description && (
-                  <p className="text-sm text-gray-600 mt-1 italic">
-                    {item.description}
-                  </p>
-                )}
-                {item.sub_menus && item.sub_menus.length > 0 && (
-                  <ul className="mt-2 space-y-1">
-                    {item.sub_menus.map((subItem, subIndex) => (
-                      <li key={subIndex} className="text-gray-700">
-                        • {subItem}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Dinner Section */}
-      {menu.dinner.length > 0 && (
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-purple-600">저녁</h3>
-          <div className="space-y-4">
-            {menu.dinner.map((item, index) => (
-              <div key={index} className="border-l-4 border-purple-400 pl-4">
-                <div className="flex justify-between items-start">
-                  <h4 className="font-medium text-lg">{item.name}</h4>
-                  <span className="text-sm text-gray-500">{item.corner_name}</span>
                 </div>
                 {item.description && (
                   <p className="text-sm text-gray-600 mt-1 italic">
@@ -83,11 +51,10 @@ export default function TodayMenu({ menu }: TodayMenuProps) {
       {/* Salad Section */}
       {menu.salad && (
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-green-600">샐러드</h3>
+          <h3 className="text-xl font-semibold mb-4 text-green-600">Salad</h3>
           <div className="border-l-4 border-green-400 pl-4">
             <div className="flex justify-between items-start">
               <h4 className="font-medium text-lg">{menu.salad.name}</h4>
-              <span className="text-sm text-gray-500">{menu.salad.corner_name}</span>
             </div>
             {menu.salad.description && (
               <p className="text-sm text-gray-600 mt-1 italic">
@@ -109,12 +76,11 @@ export default function TodayMenu({ menu }: TodayMenuProps) {
 
       {/* Dessert Section */}
       {menu.dessert && (
-        <div>
-          <h3 className="text-xl font-semibold mb-4 text-pink-600">후식</h3>
-          <div className="border-l-4 border-pink-400 pl-4">
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold mb-4 text-gray-600">Dessert</h3>
+          <div className="border-l-4 border-gray-300 pl-4">
             <div className="flex justify-between items-start">
               <h4 className="font-medium text-lg">{menu.dessert.name}</h4>
-              <span className="text-sm text-gray-500">{menu.dessert.corner_name}</span>
             </div>
             {menu.dessert.description && (
               <p className="text-sm text-gray-600 mt-1 italic">
@@ -133,6 +99,38 @@ export default function TodayMenu({ menu }: TodayMenuProps) {
           </div>
         </div>
       )}
+
+      {/* Dinner Section */}
+      {menu.dinner.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold mb-4 text-purple-600">Dinner</h3>
+          <div className="space-y-4">
+            {menu.dinner.map((item, index) => (
+              <div key={index} className="border-l-4 border-purple-400 pl-4">
+                <div className="flex justify-between items-start">
+                  <h4 className="font-medium text-lg">{item.name}</h4>
+                </div>
+                {item.description && (
+                  <p className="text-sm text-gray-600 mt-1 italic">
+                    {item.description}
+                  </p>
+                )}
+                {item.sub_menus && item.sub_menus.length > 0 && (
+                  <ul className="mt-2 space-y-1">
+                    {item.sub_menus.map((subItem, subIndex) => (
+                      <li key={subIndex} className="text-gray-700">
+                        • {subItem}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+
     </div>
   );
 }

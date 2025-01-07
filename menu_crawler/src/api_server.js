@@ -2,21 +2,22 @@ const express = require('express');
 const sqlite3 = require('sqlite3');
 const { open } = require('sqlite');
 const cors = require('cors');
-const config = require('../../config');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+// Check required environment variables
+if (!process.env.DB_PATH || !process.env.CORS_ORIGINS) {
+  console.error('Required environment variables are missing. Please check your .env file.');
+  console.error('Required variables: DB_PATH, CORS_ORIGINS');
+  process.exit(1);
+}
 
 const app = express();
-const port = config.API_PORT;
+const port = process.env.API_PORT || 8888;
 
 // CORS configuration
 const corsOptions = {
-  origin: [
-    'http://localhost:8081',
-    'http://localhost:8888',
-    'http://3.37.156.53:8081',
-    'http://3.37.156.53:8888',
-    'http://3.37.156.53'  // 도메인만 있는 경우도 허용
-  ],
+  origin: process.env.CORS_ORIGINS.split(','),
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: false,
@@ -33,7 +34,7 @@ app.use((req, res, next) => {
 });
 
 // Database connection
-const dbPath = path.resolve(__dirname, '/home/ubuntu/susong/ForeignMenu/data/menu.db');
+const dbPath = process.env.DB_PATH;
 
 app.get('/api/menu/:date', async (req, res) => {
   const date = req.params.date;

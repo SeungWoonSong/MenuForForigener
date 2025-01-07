@@ -2,10 +2,17 @@ import sqlite3
 from typing import Dict, List, Any
 import json
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+# Load environment variables
+env_path = Path(__file__).parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 class MenuDatabase:
-    def __init__(self, db_path: str = "menu_data.db"):
-        self.db_path = db_path
+    def __init__(self, db_path: str = None):
+        self.db_path = db_path or os.getenv('DB_PATH', 'menu_data.db')
         self.init_database()
 
     def init_database(self):

@@ -106,6 +106,7 @@ def update_menu_database():
     db = MenuDatabase()
     
     result = get_menu_info(test_mode=False)
+
     if not result:
         return
     
