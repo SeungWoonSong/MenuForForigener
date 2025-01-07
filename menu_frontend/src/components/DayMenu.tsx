@@ -2,7 +2,7 @@
 
 import { DayMenu as DayMenuType } from '@/types/menu';
 import { format, parse } from 'date-fns';
-import { ko } from 'date-fns/locale';
+import { ko, enUS, zhCN, sv } from 'date-fns/locale';
 import clsx from 'clsx';
 
 interface DayMenuProps {
@@ -10,8 +10,16 @@ interface DayMenuProps {
   isToday: boolean;
 }
 
+const locales = {
+  ko,
+  en: enUS,
+  zh: zhCN,
+  sv
+};
+
 export default function DayMenu({ menu, isToday }: DayMenuProps) {
   const date = parse(menu.date, 'yyyyMMdd', new Date());
+  const locale = locales[menu.language as keyof typeof locales] || enUS;
   
   return (
     <div
@@ -22,7 +30,7 @@ export default function DayMenu({ menu, isToday }: DayMenuProps) {
     >
       <div className="text-center mb-4">
         <h2 className="text-lg font-semibold">
-          {format(date, 'M/d (EEE)', { locale: ko })}
+          {format(date, 'M/d (EEE)', { locale })}
         </h2>
       </div>
       
@@ -72,18 +80,14 @@ export default function DayMenu({ menu, isToday }: DayMenuProps) {
       {menu.dessert && (
         <div className="mb-4 border border-gray-200 p-2">
           <h3 className="text-md font-semibold text-gray-600 mb-2">Dessert</h3>
-          <div className="mb-2">
-            <div className="flex justify-between items-start">
-              <span className="font-medium">{menu.dessert.name}</span>
-            </div>
-            {menu.dessert.sub_menus && menu.dessert.sub_menus.length > 0 && (
-              <ul className="mt-1 text-sm text-gray-600">
-                {menu.dessert.sub_menus.map((subItem, subIndex) => (
-                  <li key={subIndex}>• {subItem}</li>
-                ))}
-              </ul>
-            )}
-          </div>
+          {menu.dessert.sub_menus && menu.dessert.sub_menus.length > 0 && (
+            <ul className="mt-1 text-sm text-gray-600">
+              <li>• {menu.dessert.name}</li>
+              {menu.dessert.sub_menus.map((subItem, subIndex) => (
+                <li key={subIndex}>• {subItem}</li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 

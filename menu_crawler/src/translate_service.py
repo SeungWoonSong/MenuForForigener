@@ -5,9 +5,11 @@ from typing import Dict, List
 import sqlite3
 from datetime import datetime
 from dotenv import load_dotenv
+from pathlib import Path
 
 # Load environment variables from .env file
-load_dotenv()
+env_path = Path(__file__).parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 class TranslationService:
     """
@@ -27,7 +29,11 @@ class TranslationService:
             api_key=api_key,
             base_url="https://api.deepseek.com"
         )
-        self.db_path = os.path.join(os.path.dirname(__file__), '/home/ubuntu/susong/ForeignMenu/data/menu.db')
+
+        self.db_path = os.getenv('DB_PATH')
+        if not self.db_path:
+            raise ValueError("DB_PATH not found in environment variables")
+        
         self._setup_database()
 
     def _setup_database(self):
@@ -60,6 +66,46 @@ class TranslationService:
         Returns:
             Formatted prompt string for the API
         """
+        # Special translations for specific menu items
+        special_translations = {
+            '두유': {
+                'en': {'translated': 'Soy Milk', 'description': 'A plant-based milk made from soybeans'},
+                'zh': {'translated': '豆浆', 'description': '用大豆制成的植物性饮料'},
+                'sv': {'translated': 'Sojamjölk', 'description': 'En växtbaserad mjölk gjord på sojabönor'}
+            },
+            '코코넛쉬림프샐러드': {
+                'en': {'translated': 'Coconut Shrimp Salad', 'description': 'A fresh salad featuring coconut-crusted shrimp'},
+                'zh': {'translated': '椰子虾沙拉', 'description': '一道以椰丝裹虾为主的清新沙拉'},
+                'sv': {'translated': 'Kokosräkor sallad', 'description': 'En fräsch sallad med kokospanerade räkor'}
+            },
+            '훈제오리단호박샐러드': {
+                'en': {'translated': 'Smoked Duck and Pumpkin Salad', 'description': 'A fresh salad featuring smoked duck and sweet pumpkin'},
+                'zh': {'translated': '烟熏鸭肉南瓜沙拉', 'description': '新鲜的沙拉，配有烟熏鸭肉和甜南瓜'},
+                'sv': {'translated': 'Rökt anka- och pumpa sallad', 'description': 'En fräsch sallad med rökt anka och söt pumpa'}
+            },
+            '쥬스':{
+                'en': {'translated': 'Juice', 'description': 'A refreshing and refreshing juice'},
+                'zh': {'translated': '果汁', 'description': '一道清爽的果汁'},
+                'sv': {'translated': 'Jus', 'description': 'En frisk och frisk jus'}
+            },
+            '팝콘치킨샐러드': {
+                'en': {'translated': 'Popcorn Chicken Salad', 'description': 'A fresh salad topped with crispy bite-sized fried chicken pieces'},
+                'zh': {'translated': '爆米花鸡肉沙拉', 'description': '一道清新的沙拉，配上香脆的小块炸鸡'},
+                'sv': {'translated': 'Popcornkyckling sallad', 'description': 'En fräsch sallad toppad med krispiga små bitar av friterad kyckling'}
+            }
+        }
+
+        # Check if any menu item has a special translation
+        for menu_item in menu_items:
+            if menu_item in special_translations:
+                translation = special_translations[menu_item][target_lang]
+                return json.dumps([{
+                    'original': menu_item,
+                    'translated': translation['translated'],
+                    'description': translation['description']
+                }], ensure_ascii=False)
+
+        # If no special translations, proceed with normal translation
         lang_names = {
             'en': 'English',
             'zh': 'Chinese (Simplified)',
@@ -72,6 +118,11 @@ class TranslationService:
     "original": "김치찌개",
     "translated": "Kimchi Stew",
     "description": "A traditional Korean stew made with fermented kimchi, pork, and tofu"
+  },
+  {
+    "original": "훈제오리단호박샐러드",
+    "translated": "Smoked Duck and Pumpkin Salad",
+    "description": "A fresh salad featuring smoked duck and sweet pumpkin"
   }
 ]''',
             'zh': '''[
@@ -79,6 +130,11 @@ class TranslationService:
     "original": "김치찌개",
     "translated": "泡菜汤",
     "description": "一道传统的韩国汤，用发酵泡菜、猪肉和豆腐制成"
+  },
+  {
+    "original": "훈제오리단호박샐러드",
+    "translated": "烟熏鸭肉南瓜沙拉",
+    "description": "新鲜的沙拉，配有烟熏鸭肉和甜南瓜"
   }
 ]''',
             'sv': '''[
@@ -86,12 +142,19 @@ class TranslationService:
     "original": "김치찌개",
     "translated": "Kimchigryta",
     "description": "En traditionell koreansk gryta gjord på fermenterad kimchi, fläsk och tofu"
+  },
+  {
+    "original": "훈제오리단호박샐러드",
+    "translated": "Rökt anka- och pumpa sallad",
+    "description": "En fräsch sallad med rökt anka och söt pumpa"
   }
 ]'''
         }
         
         return f"""Please translate the following Korean menu items to {lang_names[target_lang]}.
 For Korean dishes that might be unfamiliar to foreigners, add a brief description in {lang_names[target_lang]}.
+Pay special attention to menu items containing '샐러드' (salad) and ensure they are translated accurately.
+Please maintain the original meaning and ingredients in the translation.
 Please respond in this exact JSON format:
 
 {lang_examples[target_lang]}
@@ -244,7 +307,7 @@ def translate_menu():
         languages = ['en', 'zh', 'sv']
         for menu_name, menu_id, item_type in menu_items:
             # Skip if the menu item is just a number or simple text
-            if menu_name.replace('/', '').replace('.', '').isdigit() or menu_name in ['쥬스', '두유']:
+            if menu_name.replace('/', '').replace('.', '').isdigit():
                 continue
                 
             translations = service.get_or_create_translations(menu_id, menu_name, languages)

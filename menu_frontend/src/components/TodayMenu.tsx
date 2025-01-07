@@ -2,15 +2,31 @@
 
 import { DayMenu } from '@/types/menu';
 import { format, parse } from 'date-fns';
-import { ko } from 'date-fns/locale';
+import { ko, enUS, zhCN, sv } from 'date-fns/locale';
 
 interface TodayMenuProps {
   menu: DayMenu;
 }
 
+const locales = {
+  ko,
+  en: enUS,
+  zh: zhCN,
+  sv
+};
+
+const dateFormats = {
+  ko: 'M월 d일 (EEEE)',
+  en: 'MMMM d, EEEE',
+  zh: 'M月d日 EEEE',
+  sv: 'd MMMM, EEEE'
+};
+
 export default function TodayMenu({ menu }: TodayMenuProps) {
   const date = parse(menu.date, 'yyyyMMdd', new Date());
-  const formattedDate = format(date, 'M월 d일 (EEEE)', { locale: ko });
+  const locale = locales[menu.language as keyof typeof locales] || enUS;
+  const dateFormat = dateFormats[menu.language as keyof typeof dateFormats] || dateFormats.en;
+  const formattedDate = format(date, dateFormat, { locale });
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
@@ -79,16 +95,9 @@ export default function TodayMenu({ menu }: TodayMenuProps) {
         <div className="mb-8">
           <h3 className="text-xl font-semibold mb-4 text-gray-600">Dessert</h3>
           <div className="border-l-4 border-gray-300 pl-4">
-            <div className="flex justify-between items-start">
-              <h4 className="font-medium text-lg">{menu.dessert.name}</h4>
-            </div>
-            {menu.dessert.description && (
-              <p className="text-sm text-gray-600 mt-1 italic">
-                {menu.dessert.description}
-              </p>
-            )}
             {menu.dessert.sub_menus && menu.dessert.sub_menus.length > 0 && (
               <ul className="mt-2 space-y-1">
+                <li className="text-gray-700">• {menu.dessert.name}</li>
                 {menu.dessert.sub_menus.map((subItem, subIndex) => (
                   <li key={subIndex} className="text-gray-700">
                     • {subItem}

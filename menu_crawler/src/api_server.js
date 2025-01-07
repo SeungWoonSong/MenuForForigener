@@ -75,7 +75,7 @@ app.get('/api/menu/:date', async (req, res) => {
     // Process and format the response
     const formattedMainMenu = mainMenu.map(item => ({
       id: item.id,
-      name: lang === 'ko' ? item.name : (item.translated_name || item.name),
+      name: lang === 'ko' ? item.name : (item.translated_name || `[${item.name}]`),
       meal_type: item.meal_type,
       corner_name: item.corner_name,
       description: item.description || ''
@@ -83,7 +83,7 @@ app.get('/api/menu/:date', async (req, res) => {
 
     const formattedSubMenu = subMenu.map(item => ({
       id: item.id,
-      name: lang === 'ko' ? item.name : (item.translated_name || item.name),
+      name: lang === 'ko' ? item.name : (item.translated_name || `[${item.name}]`),
       main_menu_id: item.main_menu_id,
       description: item.description || ''
     }));
