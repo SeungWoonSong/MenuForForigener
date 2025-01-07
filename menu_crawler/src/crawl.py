@@ -47,6 +47,10 @@ def format_menu_item(menu: Dict[str, Any]) -> str:
 
 def get_menu_info(test_mode: bool = True) -> Dict[str, Any]:
     """Fetch menu information from the API and return the result."""
+    if test_mode:
+        with open('sample_response.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    
     # Get environment variables
     EX_STOR_CD = int(os.getenv('EX_STOR_CD', '1010'))
     ACCESS_TOKEN = os.getenv('ACCESS_TOKEN', '')
@@ -89,6 +93,11 @@ def get_menu_info(test_mode: bool = True) -> Dict[str, Any]:
         result = response.json()
         
         if result.get("return") == "1":
+            # 샐러드 코너 데이터만 로깅
+            for menu in result.get("list", []):
+                if "샐러드" in menu.get("CORNERNM", ""):
+                    print("\n=== 샐러드 코너 원본 데이터 ===")
+                    print(json.dumps(menu, ensure_ascii=False, indent=2))
             return result
         else:
             print(f"API 오류: {result.get('errmsg', '알 수 없는 오류')}")

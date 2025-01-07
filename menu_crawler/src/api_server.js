@@ -53,7 +53,7 @@ app.get('/api/menu/:date', async (req, res) => {
       SELECT m.id, m.main_menu as name, m.meal_type, m.corner_name,
              t.translated_name, t.description
       FROM main_menu m
-      LEFT JOIN menu_translations t ON m.id = t.menu_id AND t.language = ?
+      LEFT JOIN menu_translations t ON m.main_menu = t.menu_name AND t.language = ?
       WHERE m.date = ?
     `;
     
@@ -64,7 +64,7 @@ app.get('/api/menu/:date', async (req, res) => {
       SELECT s.id, s.menu_name as name, s.main_menu_id,
              t.translated_name, t.description
       FROM sub_menu s
-      LEFT JOIN menu_translations t ON s.id = t.menu_id AND t.language = ?
+      LEFT JOIN menu_translations t ON s.menu_name = t.menu_name AND t.language = ?
       WHERE s.main_menu_id IN (
         SELECT id FROM main_menu WHERE date = ?
       )

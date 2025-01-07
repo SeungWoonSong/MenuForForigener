@@ -44,14 +44,15 @@ class TranslationService:
         # Create translations table if not exists
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS menu_translations (
-            menu_id INTEGER,
+            menu_name TEXT,
             language TEXT,
             translated_name TEXT,
             description TEXT,
             created_at TEXT,
-            PRIMARY KEY (menu_id, language)
+            PRIMARY KEY (menu_name, language)
         )
         ''')
+        
         conn.commit()
         conn.close()
 
@@ -66,98 +67,59 @@ class TranslationService:
         Returns:
             Formatted prompt string for the API
         """
-        # Special translations for specific menu items
-        special_translations = {
-            '두유': {
-                'en': {'translated': 'Soy Milk', 'description': 'A plant-based milk made from soybeans'},
-                'zh': {'translated': '豆浆', 'description': '用大豆制成的植物性饮料'},
-                'sv': {'translated': 'Sojamjölk', 'description': 'En växtbaserad mjölk gjord på sojabönor'}
-            },
-            '코코넛쉬림프샐러드': {
-                'en': {'translated': 'Coconut Shrimp Salad', 'description': 'A fresh salad featuring coconut-crusted shrimp'},
-                'zh': {'translated': '椰子虾沙拉', 'description': '一道以椰丝裹虾为主的清新沙拉'},
-                'sv': {'translated': 'Kokosräkor sallad', 'description': 'En fräsch sallad med kokospanerade räkor'}
-            },
-            '훈제오리단호박샐러드': {
-                'en': {'translated': 'Smoked Duck and Pumpkin Salad', 'description': 'A fresh salad featuring smoked duck and sweet pumpkin'},
-                'zh': {'translated': '烟熏鸭肉南瓜沙拉', 'description': '新鲜的沙拉，配有烟熏鸭肉和甜南瓜'},
-                'sv': {'translated': 'Rökt anka- och pumpa sallad', 'description': 'En fräsch sallad med rökt anka och söt pumpa'}
-            },
-            '쥬스':{
-                'en': {'translated': 'Juice', 'description': 'A refreshing and refreshing juice'},
-                'zh': {'translated': '果汁', 'description': '一道清爽的果汁'},
-                'sv': {'translated': 'Jus', 'description': 'En frisk och frisk jus'}
-            },
-            '팝콘치킨샐러드': {
-                'en': {'translated': 'Popcorn Chicken Salad', 'description': 'A fresh salad topped with crispy bite-sized fried chicken pieces'},
-                'zh': {'translated': '爆米花鸡肉沙拉', 'description': '一道清新的沙拉，配上香脆的小块炸鸡'},
-                'sv': {'translated': 'Popcornkyckling sallad', 'description': 'En fräsch sallad toppad med krispiga små bitar av friterad kyckling'}
-            }
-        }
-
-        # Check if any menu item has a special translation
-        for menu_item in menu_items:
-            if menu_item in special_translations:
-                translation = special_translations[menu_item][target_lang]
-                return json.dumps([{
-                    'original': menu_item,
-                    'translated': translation['translated'],
-                    'description': translation['description']
-                }], ensure_ascii=False)
-
-        # If no special translations, proceed with normal translation
-        lang_names = {
+        language_map = {
             'en': 'English',
             'zh': 'Chinese (Simplified)',
             'sv': 'Swedish'
         }
         
-        lang_examples = {
-            'en': '''[
-  {
-    "original": "김치찌개",
-    "translated": "Kimchi Stew",
-    "description": "A traditional Korean stew made with fermented kimchi, pork, and tofu"
-  },
-  {
-    "original": "훈제오리단호박샐러드",
-    "translated": "Smoked Duck and Pumpkin Salad",
-    "description": "A fresh salad featuring smoked duck and sweet pumpkin"
-  }
-]''',
-            'zh': '''[
-  {
-    "original": "김치찌개",
-    "translated": "泡菜汤",
-    "description": "一道传统的韩国汤，用发酵泡菜、猪肉和豆腐制成"
-  },
-  {
-    "original": "훈제오리단호박샐러드",
-    "translated": "烟熏鸭肉南瓜沙拉",
-    "description": "新鲜的沙拉，配有烟熏鸭肉和甜南瓜"
-  }
-]''',
-            'sv': '''[
-  {
-    "original": "김치찌개",
-    "translated": "Kimchigryta",
-    "description": "En traditionell koreansk gryta gjord på fermenterad kimchi, fläsk och tofu"
-  },
-  {
-    "original": "훈제오리단호박샐러드",
-    "translated": "Rökt anka- och pumpa sallad",
-    "description": "En fräsch sallad med rökt anka och söt pumpa"
-  }
-]'''
+        examples = {
+            'en': [
+                {
+                    "original": "김치찌개",
+                    "translated": "Kimchi Stew",
+                    "description": "A traditional Korean stew made with fermented kimchi, pork, and tofu"
+                },
+                {
+                    "original": "팝콘치킨샐러드",
+                    "translated": "Popcorn Chicken Salad",
+                    "description": "A fresh salad topped with crispy bite-sized fried chicken pieces"
+                }
+            ],
+            'zh': [
+                {
+                    "original": "김치찌개",
+                    "translated": "泡菜汤",
+                    "description": "一道传统的韩国汤，用发酵泡菜、猪肉和豆腐制成"
+                },
+                {
+                    "original": "팝콘치킨샐러드",
+                    "translated": "爆米花鸡肉沙拉",
+                    "description": "一道清新的沙拉，配上香脆的小块炸鸡"
+                }
+            ],
+            'sv': [
+                {
+                    "original": "김치찌개",
+                    "translated": "Kimchigryta",
+                    "description": "En traditionell koreansk gryta gjord på fermenterad kimchi, fläsk och tofu"
+                },
+                {
+                    "original": "팝콘치킨샐러드",
+                    "translated": "Popcornkycklingssallad",
+                    "description": "En fräsch sallad toppad med krispiga små bitar av friterad kyckling"
+                }
+            ]
         }
         
-        return f"""Please translate the following Korean menu items to {lang_names[target_lang]}.
-For Korean dishes that might be unfamiliar to foreigners, add a brief description in {lang_names[target_lang]}.
-Pay special attention to menu items containing '샐러드' (salad) and ensure they are translated accurately.
+        return f"""You are a professional menu translator. Please translate the following Korean menu items to {language_map[target_lang]}.
+For Korean dishes that might be unfamiliar to foreigners, add a brief description.
 Please maintain the original meaning and ingredients in the translation.
-Please respond in this exact JSON format:
+Please respond ONLY in this exact JSON format and nothing else.
+Make sure to translate both the name and description to {language_map[target_lang]}.
 
-{lang_examples[target_lang]}
+Here are some examples in {language_map[target_lang]}:
+{json.dumps(examples[target_lang], ensure_ascii=False, indent=2)}
 
 Korean menu items to translate:
 {json.dumps(menu_items, ensure_ascii=False)}"""
@@ -174,31 +136,33 @@ Korean menu items to translate:
             List of translation results with descriptions
         """
         try:
-            print(f"\nTranslating to {target_lang}: {menu_items}")
             prompt = self._get_translation_prompt(menu_items, target_lang)
-            print(f"\nPrompt:\n{prompt}")
             
-            response = self.client.chat.completions.create(
+            completion = self.client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[
-                    {"role": "system", "content": "You are a professional menu translator."},
+                    {"role": "system", "content": "You are a professional menu translator. Always respond in the exact JSON format requested, with no additional text or explanations."},
                     {"role": "user", "content": prompt}
                 ],
-                stream=False
+                temperature=0.7,
+                max_tokens=1000
             )
             
-            content = response.choices[0].message.content
-            print(f"\nAPI Response:\n{content}")
+            response_text = completion.choices[0].message.content
             
-            # Remove markdown code block if present
-            if content.startswith("```"):
-                content = content.split("```")[1]
-                if content.startswith("json"):
-                    content = content[4:]
-                content = content.strip()
+            # Extract JSON from response
+            start_idx = response_text.find('[')
+            end_idx = response_text.rfind(']') + 1
             
-            translations = json.loads(content)
+            if start_idx == -1 or end_idx == 0:
+                print(f"Invalid response format: {response_text}")
+                return []
+                
+            json_str = response_text[start_idx:end_idx]
+            translations = json.loads(json_str)
+            
             return translations
+            
         except Exception as e:
             print(f"Translation error: {str(e)}")
             print(f"Full error details: {e.__class__.__name__}")
@@ -226,8 +190,8 @@ Korean menu items to translate:
             cursor.execute('''
             SELECT translated_name, description
             FROM menu_translations
-            WHERE menu_id = ? AND language = ?
-            ''', (menu_id, lang))
+            WHERE menu_name = ? AND language = ?
+            ''', (menu_name, lang))
             
             result = cursor.fetchone()
             if result:
@@ -249,10 +213,10 @@ Korean menu items to translate:
                     }
                     
                     cursor.execute('''
-                    INSERT INTO menu_translations (menu_id, language, translated_name, description, created_at)
+                    INSERT INTO menu_translations (menu_name, language, translated_name, description, created_at)
                     VALUES (?, ?, ?, ?, ?)
                     ''', (
-                        menu_id,
+                        menu_name,
                         lang,
                         trans_item['translated'],
                         trans_item.get('description'),
@@ -294,23 +258,23 @@ def translate_menu():
         
         # Get all unique menu items from both main_menu and sub_menu tables
         cursor.execute('''
-        SELECT DISTINCT m.menu_name as name, m.id, 'sub' as type 
-        FROM sub_menu m
+        SELECT DISTINCT menu_name as name
+        FROM sub_menu
         UNION 
-        SELECT DISTINCT m.main_menu as name, m.id, 'main' as type 
-        FROM main_menu m
+        SELECT DISTINCT main_menu as name
+        FROM main_menu
         ''')
         menu_items = cursor.fetchall()
         conn.close()
         
         # Translate each menu item
         languages = ['en', 'zh', 'sv']
-        for menu_name, menu_id, item_type in menu_items:
+        for (menu_name,) in menu_items:
             # Skip if the menu item is just a number or simple text
             if menu_name.replace('/', '').replace('.', '').isdigit():
                 continue
                 
-            translations = service.get_or_create_translations(menu_id, menu_name, languages)
+            translations = service.get_or_create_translations(None, menu_name, languages)
             
             # Insert translations into database
             conn = sqlite3.connect(service.db_path)
@@ -321,10 +285,10 @@ def translate_menu():
                     try:
                         cursor.execute('''
                         INSERT OR REPLACE INTO menu_translations 
-                        (menu_id, language, translated_name, description, created_at)
+                        (menu_name, language, translated_name, description, created_at)
                         VALUES (?, ?, ?, ?, ?)
                         ''', (
-                            menu_id,
+                            menu_name,
                             lang,
                             trans['translated'],
                             trans.get('description'),

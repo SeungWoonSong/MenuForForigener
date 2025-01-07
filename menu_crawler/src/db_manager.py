@@ -57,6 +57,25 @@ class MenuDatabase:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 
+                # 샐러드 코너인 경우 특별 처리
+                is_salad = "샐러드" in menu_data.get('CORNERNM', '')
+                main_menu = menu_data['MENUNM']
+                sub_menus = []
+                
+                if is_salad:
+                    # 메인 메뉴가 음료인 경우, 서브메뉴에서 실제 샐러드 메뉴를 찾아 교체
+                    if main_menu in ['두유', '쥬스']:
+                        for sub in menu_data.get('SUB_MENU_INFO', []):
+                            sub_name = sub.get('MENUNM', '')
+                            if sub_name not in ['두유', '쥬스']:
+                                main_menu = sub_name
+                                break
+                    
+                    # 모든 서브메뉴 포함 (음료 포함)
+                    sub_menus = menu_data.get('SUB_MENU_INFO', [])
+                else:
+                    sub_menus = menu_data.get('SUB_MENU_INFO', [])
+                
                 # 메인 메뉴 정보 삽입
                 cursor.execute('''
                     INSERT OR IGNORE INTO main_menu 
@@ -68,7 +87,7 @@ class MenuDatabase:
                     f"{menu_data['FR_TM']}~{menu_data['TO_TM']}",
                     menu_data['CORNER'],
                     menu_data['CORNERNM'],
-                    menu_data['MENUNM'],
+                    main_menu,  # 수정된 메인 메뉴 사용
                     menu_data['MENU']
                 ))
                 
@@ -76,8 +95,8 @@ class MenuDatabase:
                 main_menu_id = cursor.lastrowid
                 
                 # 부가 메뉴가 있고 새로운 메인 메뉴가 삽입된 경우에만 부가 메뉴 삽입
-                if main_menu_id and menu_data.get('SUB_MENU_INFO'):
-                    for sub_menu in menu_data['SUB_MENU_INFO']:
+                if main_menu_id and sub_menus:
+                    for sub_menu in sub_menus:
                         if sub_menu.get('MENUNM'):  # None이 아닌 경우에만 삽입
                             cursor.execute('''
                                 INSERT INTO sub_menu (main_menu_id, menu_name)

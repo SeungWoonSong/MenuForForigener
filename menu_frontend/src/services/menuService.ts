@@ -4,7 +4,7 @@ import { format, addDays, isSunday, isWeekend } from 'date-fns';
 // Dynamically determine API URL based on the current hostname
 const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
   ? 'http://localhost:8888'
-  : 'http://3.37.156.53:8888';
+  : 'https://menu.api.sungwoonsong.com';
 
 export type Language = 'ko' | 'en' | 'zh' | 'sv';
 
